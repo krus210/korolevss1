@@ -22,26 +22,31 @@ class PostService(private val repo: PostRepository) {
         return PostResponseDto.fromModel(model)
     }
 
+    @KtorExperimentalAPI
     suspend fun likeById(id: Long): PostResponseDto {
         val model = repo.likeById(id) ?: throw NotFoundException()
         return PostResponseDto.fromModel(model)
     }
 
+    @KtorExperimentalAPI
     suspend fun dislikeById(id: Long): PostResponseDto {
         val model = repo.dislikeById(id) ?: throw NotFoundException()
         return PostResponseDto.fromModel(model)
     }
 
+    @KtorExperimentalAPI
     suspend fun commentById(id: Long): PostResponseDto {
         val model = repo.commentById(id) ?: throw NotFoundException()
         return PostResponseDto.fromModel(model)
     }
 
+    @KtorExperimentalAPI
     suspend fun shareById(id: Long): PostResponseDto {
         val model = repo.shareById(id) ?: throw NotFoundException()
         return PostResponseDto.fromModel(model)
     }
 
+    @KtorExperimentalAPI
     suspend fun removeById(id: Long, me: UserModel?): Boolean {
         val model = repo.getById(id) ?: throw NotFoundException()
         return if (model.user == me) {
@@ -52,7 +57,7 @@ class PostService(private val repo: PostRepository) {
         }
     }
 
-    suspend fun save(input: PostRequestDto, me: UserModel?): PostResponseDto {
+    suspend fun save(input: PostRequestDto, me: UserModel?): PostResponseDto? {
         val model = PostModel(
             id = input.id,
             textOfPost = input.textOfPost,
@@ -63,7 +68,7 @@ class PostService(private val repo: PostRepository) {
         if (input.id != 0L) {
             val existingPostModel = repo.getById(input.id)
             if (existingPostModel?.user?.id != me?.id) {
-                throw InvalidOwnerException("You can't change this post")
+                return null
             }
         }
         return PostResponseDto.fromModel(repo.save(model))

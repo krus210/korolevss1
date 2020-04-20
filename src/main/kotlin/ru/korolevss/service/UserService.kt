@@ -1,6 +1,8 @@
 package ru.korolevss.service
 
 import io.ktor.features.NotFoundException
+import io.ktor.http.HttpStatusCode
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.sync.Mutex
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.korolevss.dto.AuthenticationRequestDto
@@ -29,11 +31,13 @@ class UserService(
         return repo.getByUsername(username)
     }
 
+    @KtorExperimentalAPI
     suspend fun getById(id: Long): UserResponseDto {
         val model = repo.getById(id) ?: throw NotFoundException()
         return UserResponseDto.fromModel(model)
     }
 
+    @KtorExperimentalAPI
     suspend fun changePassword(id: Long, input: PasswordChangeRequestDto) {
         try {
             val model = repo.getById(id) ?: throw NotFoundException()
@@ -47,6 +51,7 @@ class UserService(
         }
     }
 
+    @KtorExperimentalAPI
     suspend fun authenticate(input: AuthenticationRequestDto): AuthenticationResponseDto {
         val model = repo.getByUsername(input.username) ?: throw NotFoundException()
         if (!passwordEncoder.matches(input.password, model.password)) {
@@ -57,15 +62,17 @@ class UserService(
         return AuthenticationResponseDto(token)
     }
 
-    suspend fun save(username: String, password: String) {
-        try {
+    suspend fun save(username: String, password: String) : AuthenticationResponseDto {
+        return try {
             if (repo.getByUsername(username) != null) {
-                println("This user is already registered")
+                AuthenticationResponseDto("response 400")
             } else {
-                repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
+                val model = repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
+                val token = tokenService.generate(model.id)
+                AuthenticationResponseDto(token)
             }
         } catch (e: IOException) {
-            println("User is not registered, try later")
+            AuthenticationResponseDto("response 503")
         }
     }
 }
