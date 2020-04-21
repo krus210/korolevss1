@@ -11,6 +11,7 @@ import ru.korolevss.dto.PasswordChangeRequestDto
 import ru.korolevss.dto.UserResponseDto
 import ru.korolevss.exception.InvalidPasswordException
 import ru.korolevss.exception.PasswordChangeException
+import ru.korolevss.exception.UserExistsException
 import ru.korolevss.model.MediaModel
 import ru.korolevss.model.UserModel
 import ru.korolevss.repository.UserRepository
@@ -47,7 +48,7 @@ class UserService(
             val copy = model.copy(password = passwordEncoder.encode(input.new))
             repo.save(copy)
         } catch (e: IOException) {
-            println("New password not saved")
+            throw PasswordChangeException("New password not saved")
         }
     }
 
@@ -62,17 +63,13 @@ class UserService(
         return AuthenticationResponseDto(token)
     }
 
-    suspend fun save(username: String, password: String) : AuthenticationResponseDto {
-        return try {
-            if (repo.getByUsername(username) != null) {
-                AuthenticationResponseDto("response 400")
-            } else {
-                val model = repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
-                val token = tokenService.generate(model.id)
-                AuthenticationResponseDto(token)
-            }
-        } catch (e: IOException) {
-            AuthenticationResponseDto("response 503")
+    suspend fun save(username: String, password: String): AuthenticationResponseDto {
+        if (repo.getByUsername(username) != null) {
+            throw UserExistsException("User already exists")
+        } else {
+            val model = repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
+            val token = tokenService.generate(model.id)
+            return AuthenticationResponseDto(token)
         }
     }
 }

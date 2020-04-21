@@ -4,7 +4,7 @@ import io.ktor.features.NotFoundException
 import io.ktor.util.KtorExperimentalAPI
 import ru.korolevss.dto.PostRequestDto
 import ru.korolevss.dto.PostResponseDto
-import ru.korolevss.exception.InvalidOwnerException
+import ru.korolevss.exception.UserAccessException
 import ru.korolevss.model.MediaModel
 import ru.korolevss.model.MediaType
 import ru.korolevss.model.PostModel
@@ -57,7 +57,7 @@ class PostService(private val repo: PostRepository) {
         }
     }
 
-    suspend fun save(input: PostRequestDto, me: UserModel?): PostResponseDto? {
+    suspend fun save(input: PostRequestDto, me: UserModel?): PostResponseDto {
         val model = PostModel(
             id = input.id,
             textOfPost = input.textOfPost,
@@ -68,7 +68,7 @@ class PostService(private val repo: PostRepository) {
         if (input.id != 0L) {
             val existingPostModel = repo.getById(input.id)
             if (existingPostModel?.user?.id != me?.id) {
-                return null
+                throw UserAccessException("Access denied, Another user posted this post")
             }
         }
         return PostResponseDto.fromModel(repo.save(model))

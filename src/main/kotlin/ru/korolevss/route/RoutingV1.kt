@@ -1,7 +1,5 @@
 package ru.korolevss.route
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import io.ktor.application.call
 import io.ktor.auth.authenticate
 import io.ktor.features.ParameterConversionException
@@ -13,7 +11,6 @@ import io.ktor.request.receiveMultipart
 import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.KtorExperimentalAPI
-import org.json.JSONObject
 import ru.korolevss.dto.AuthenticationRequestDto
 import ru.korolevss.dto.PostRequestDto
 import ru.korolevss.dto.UserResponseDto
@@ -38,25 +35,12 @@ class RoutingV1(
 
                 route("/") {
                     post("/registration") {
-                        val input = call.receive<JSONObject>()
-                        val username = input.getString("username")
-                        val password = input.getString("password")
+                        val input = call.receive<AuthenticationRequestDto>()
+                        val username = input.username
+                        val password = input.password
                         val response = userService.save(username, password)
-                        when {
-                            response.token.contains("response 400") -> {
-                                val message = JSONObject().put("error", "This user is already existed")
-                                call.respond(HttpStatusCode.BadRequest, message)
-                            }
-                            response.token.contains("response 503") -> {
-                                val message =
-                                    JSONObject().put("error", "another user make registration at the same time")
-                                call.respond(HttpStatusCode.ServiceUnavailable, message)
-                            }
-                            else -> {
-                                call.respond(response)
-                            }
+                        call.respond(response)
                         }
-                    }
 
                     post("/authentication") {
                         val input = call.receive<AuthenticationRequestDto>()
@@ -119,7 +103,7 @@ class RoutingV1(
                         }
                         post {
                             val input = call.receive<PostRequestDto>()
-                            val response = postService.save(input, me) ?: HttpStatusCode.Forbidden
+                            val response = postService.save(input, me)
                             call.respond(response)
                         }
                         delete("/{id}") {
