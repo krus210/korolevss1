@@ -42,7 +42,7 @@ class UserService(
         }
         val copy = model.copy(password = passwordEncoder.encode(input.new))
         repo.save(copy)
-        val token = tokenService.generate(model)
+        val token = tokenService.generate(copy)
         return AuthenticationResponseDto(token)
     }
 
