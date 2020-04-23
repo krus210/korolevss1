@@ -12,8 +12,7 @@ class JWTTokenService {
     val verifier: JWTVerifier = JWT.require(algo).build()
 
     fun generate(model: UserModel): String = JWT.create()
-        .withClaim("id", model.id)
-        .withClaim("password", model.password)
+        .withClaim("model", "${model.id} ${model.password}" )
         // TODO: Comment this to disable expiration
         //.withExpiresAt(Date(System.currentTimeMillis() + 1000))
         .sign(algo)
