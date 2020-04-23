@@ -5,7 +5,6 @@ import ru.korolevss.model.PostModel
 import ru.korolevss.model.PostType
 
 class PostRequestDto (
-    val id: Long,
     val textOfPost: String? = null,
     val postType: PostType = PostType.POST,
     val source: PostModel? = null,

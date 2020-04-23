@@ -1,9 +1,6 @@
 package ru.korolevss.dto
 
-import ru.korolevss.model.Coordinates
-import ru.korolevss.model.MediaModel
-import ru.korolevss.model.PostModel
-import ru.korolevss.model.PostType
+import ru.korolevss.model.*
 import java.time.ZonedDateTime
 
 class PostResponseDto(
@@ -11,12 +8,12 @@ class PostResponseDto(
     val textOfPost: String? = null,
     val dateOfPost: ZonedDateTime? = null,
     val nameAuthor: String?,
-    var sharesCount: Int = 0,
-    var commentsCount: Int = 0,
-    var likesCount: Int = 0,
-    var isLikedByUser: Boolean = false,
-    var isCommentedByUser: Boolean = false,
-    var isSharedByUser: Boolean = false,
+    var sharesCount: Int,
+    var commentsCount: Int,
+    var likesCount: Int,
+    var isLikedByUser: Boolean,
+    var isCommentedByUser: Boolean,
+    var isSharedByUser: Boolean,
     val postType: PostType = PostType.POST,
     val source: PostModel? = null,
     val address: String? = null,
@@ -25,23 +22,32 @@ class PostResponseDto(
     val sourceAd: String? = null
 ) {
     companion object {
-        fun fromModel(postModel: PostModel) = PostResponseDto(
-            id = postModel.id,
-            textOfPost = postModel.textOfPost,
-            dateOfPost = postModel.dateOfPost,
-            nameAuthor = postModel.user?.username,
-            sharesCount = postModel.sharesCount,
-            commentsCount = postModel.commentsCount,
-            likesCount = postModel.likesCount,
-            isLikedByUser = postModel.isLikedByUser,
-            isCommentedByUser = postModel.isCommentedByUser,
-            isSharedByUser = postModel.isSharedByUser,
-            postType = postModel.postType,
-            source = postModel.source,
-            address = postModel.address,
-            coordinates = postModel.coordinates,
-            sourceVideo = postModel.sourceVideo,
-            sourceAd = postModel.sourceAd
-        )
+        fun fromModel(postModel: PostModel, userId: Long): PostResponseDto {
+            val isLikedByUser = postModel.likedUserIdList.contains(userId)
+            val isCommentByUser = postModel.commentUserIdList.contains(userId)
+            val isShareByUser = postModel.shareUserIdList.contains(userId)
+            val likesCount = postModel.likedUserIdList.size
+            val commentsCount = postModel.commentUserIdList.size
+            val sharesCount = postModel.shareUserIdList.size
+
+            return PostResponseDto(
+                id = postModel.id,
+                textOfPost = postModel.textOfPost,
+                dateOfPost = postModel.dateOfPost,
+                nameAuthor = postModel.user?.username,
+                sharesCount = likesCount,
+                commentsCount = commentsCount,
+                likesCount = sharesCount,
+                isLikedByUser = isLikedByUser,
+                isCommentedByUser = isCommentByUser,
+                isSharedByUser = isShareByUser,
+                postType = postModel.postType,
+                source = postModel.source,
+                address = postModel.address,
+                coordinates = postModel.coordinates,
+                sourceVideo = postModel.sourceVideo,
+                sourceAd = postModel.sourceAd
+            )
+        }
     }
 }

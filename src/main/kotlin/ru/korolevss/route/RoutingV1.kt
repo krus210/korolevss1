@@ -12,6 +12,7 @@ import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.KtorExperimentalAPI
 import ru.korolevss.dto.AuthenticationRequestDto
+import ru.korolevss.dto.PasswordChangeRequestDto
 import ru.korolevss.dto.PostRequestDto
 import ru.korolevss.dto.UserResponseDto
 import ru.korolevss.me
@@ -54,11 +55,16 @@ class RoutingV1(
                         get {
                             call.respond(UserResponseDto.fromModel(me!!))
                         }
+                        post("/change-password"){
+                            val input = call.receive<PasswordChangeRequestDto>()
+                            val response = userService.changePassword(me!!.id, input)
+                            call.respond(response)
+                        }
                     }
 
                     route("/posts") {
                         get {
-                            val response = postService.getAll()
+                            val response = postService.getAll(me!!.id)
                             call.respond(response)
                         }
                         get("/{id}") {
@@ -66,7 +72,7 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.getById(id)
+                            val response = postService.getById(id, me!!.id)
                             call.respond(response)
                         }
                         get("/{id}/like") {
@@ -74,7 +80,7 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.likeById(id)
+                            val response = postService.likeById(id, me!!.id)
                             call.respond(response)
                         }
                         get("/{id}/dislike") {
@@ -82,7 +88,7 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.dislikeById(id)
+                            val response = postService.dislikeById(id, me!!.id)
                             call.respond(response)
                         }
                         get("/{id}/comment") {
@@ -90,7 +96,7 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.commentById(id)
+                            val response = postService.commentById(id, me!!.id)
                             call.respond(response)
                         }
                         get("/{id}/share") {
@@ -98,12 +104,21 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.shareById(id)
+                            val response = postService.shareById(id, me!!.id)
                             call.respond(response)
                         }
                         post {
                             val input = call.receive<PostRequestDto>()
-                            val response = postService.save(input, me)
+                            val response = postService.save(input, me!!)
+                            call.respond(response)
+                        }
+                        post("/{id}") {
+                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
+                                "id",
+                                "Long"
+                            )
+                            val input = call.receive<PostRequestDto>()
+                            val response = postService.saveById(id, input, me!!)
                             call.respond(response)
                         }
                         delete("/{id}") {
@@ -111,7 +126,7 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            if (!postService.removeById(id, me)) {
+                            if (!postService.removeById(id, me!!)) {
                                 println("You can't delete post of another user")
                             }
                         }

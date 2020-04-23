@@ -46,51 +46,39 @@ class PostRepositoryMutex : PostRepository {
         }
     }
 
-    override suspend fun likeById(id: Long): PostModel? {
+    override suspend fun likeById(id: Long, userId: Long): PostModel? {
         val index = items.indexOfFirst { it.id == id }
-        if (index < 0) {
-            return null
+        if (index < 0) return null
+        mutex.withLock {
+            items[index].likedUserIdList.add(userId)
         }
-        with(items[index]) {
-            likesCount++
-            isLikedByUser = true
-            return this
-        }
+        return items[index]
     }
 
-    override suspend fun dislikeById(id: Long): PostModel? {
+    override suspend fun dislikeById(id: Long, userId: Long): PostModel? {
         val index = items.indexOfFirst { it.id == id }
-        if (index < 0) {
-            return null
+        if (index < 0) return null
+        mutex.withLock {
+            items[index].likedUserIdList.remove(userId)
         }
-        with(items[index]) {
-            likesCount--
-            isLikedByUser = false
-            return this
-        }
+        return items[index]
     }
 
-    override suspend fun commentById(id: Long): PostModel? {
+    override suspend fun commentById(id: Long, userId: Long): PostModel? {
         val index = items.indexOfFirst { it.id == id }
-        if (index < 0) {
-            return null
+        if (index < 0) return null
+        mutex.withLock {
+            items[index].commentUserIdList.add(userId)
         }
-        with(items[index]) {
-            commentsCount--
-            isCommentedByUser = false
-            return this
-        }
+        return items[index]
     }
 
-    override suspend fun shareById(id: Long): PostModel? {
+    override suspend fun shareById(id: Long, userId: Long): PostModel? {
         val index = items.indexOfFirst { it.id == id }
-        if (index < 0) {
-            return null
+        if (index < 0) return null
+        mutex.withLock {
+            items[index].shareUserIdList.add(userId)
         }
-        with(items[index]) {
-            sharesCount--
-            isSharedByUser = false
-            return this
-        }
+        return items[index]
     }
 }

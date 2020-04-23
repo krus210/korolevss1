@@ -23,9 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import ru.korolevss.dto.ErrorDto
 import ru.korolevss.dto.PostRequestDto
 import ru.korolevss.dto.PostResponseDto
-import ru.korolevss.exception.ConfigurationException
-import ru.korolevss.exception.UserAccessException
-import ru.korolevss.exception.UserExistsException
+import ru.korolevss.exception.*
 import ru.korolevss.model.PostModel
 import ru.korolevss.repository.PostRepository
 import ru.korolevss.repository.PostRepositoryMutex
@@ -51,6 +49,10 @@ fun Application.module() {
     }
 
     install(StatusPages) {
+        exception<NotFoundException> { error ->
+            call.respond(HttpStatusCode.NotFound)
+            throw error
+        }
         exception<NotImplementedError> { error ->
             call.respond(HttpStatusCode.NotImplemented)
             throw error
@@ -67,12 +69,20 @@ fun Application.module() {
             call.respond(HttpStatusCode.BadRequest, ErrorDto(error.message))
             throw error
         }
-        exception<UserAccessException> {error ->
+        exception<UserAccessException> { error ->
             call.respond(HttpStatusCode.Forbidden, ErrorDto(error.message))
             throw error
         }
-        exception<PasswordException> {error ->
+        exception<PasswordChangeException> { error ->
             call.respond(HttpStatusCode.Forbidden, ErrorDto(error.message))
+            throw error
+        }
+        exception<InvalidPasswordException> { error ->
+            call.respond(HttpStatusCode.Unauthorized, ErrorDto(error.message))
+            throw error
+        }
+        exception<NullUsernameOrPasswordException> { error ->
+            call.respond(HttpStatusCode.BadRequest, ErrorDto(error.message))
             throw error
         }
     }

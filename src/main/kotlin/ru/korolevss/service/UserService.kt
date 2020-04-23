@@ -10,6 +10,7 @@ import ru.korolevss.dto.AuthenticationResponseDto
 import ru.korolevss.dto.PasswordChangeRequestDto
 import ru.korolevss.dto.UserResponseDto
 import ru.korolevss.exception.InvalidPasswordException
+import ru.korolevss.exception.NullUsernameOrPasswordException
 import ru.korolevss.exception.PasswordChangeException
 import ru.korolevss.exception.UserExistsException
 import ru.korolevss.model.MediaModel
@@ -39,17 +40,15 @@ class UserService(
     }
 
     @KtorExperimentalAPI
-    suspend fun changePassword(id: Long, input: PasswordChangeRequestDto) {
-        try {
-            val model = repo.getById(id) ?: throw NotFoundException()
-            if (!passwordEncoder.matches(input.old, model.password)) {
-                throw PasswordChangeException("Wrong password!")
-            }
-            val copy = model.copy(password = passwordEncoder.encode(input.new))
-            repo.save(copy)
-        } catch (e: IOException) {
-            throw PasswordChangeException("New password not saved")
+    suspend fun changePassword(id: Long, input: PasswordChangeRequestDto): AuthenticationResponseDto {
+        val model = repo.getById(id) ?: throw NotFoundException()
+        if (!passwordEncoder.matches(input.old, model.password)) {
+            throw PasswordChangeException("Wrong password!")
         }
+        val copy = model.copy(password = passwordEncoder.encode(input.new))
+        repo.save(copy)
+        val token = tokenService.generate(model.id)
+        return AuthenticationResponseDto(token)
     }
 
     @KtorExperimentalAPI
@@ -64,7 +63,9 @@ class UserService(
     }
 
     suspend fun save(username: String, password: String): AuthenticationResponseDto {
-        if (repo.getByUsername(username) != null) {
+        if (username == "" || password == "") {
+            throw NullUsernameOrPasswordException("Username or password is empty")
+        } else if (repo.getByUsername(username) != null) {
             throw UserExistsException("User already exists")
         } else {
             val model = repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
