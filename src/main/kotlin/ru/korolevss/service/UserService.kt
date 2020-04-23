@@ -1,9 +1,7 @@
 package ru.korolevss.service
 
 import io.ktor.features.NotFoundException
-import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.sync.Mutex
 import org.springframework.security.crypto.password.PasswordEncoder
 import ru.korolevss.dto.AuthenticationRequestDto
 import ru.korolevss.dto.AuthenticationResponseDto
@@ -13,17 +11,14 @@ import ru.korolevss.exception.InvalidPasswordException
 import ru.korolevss.exception.NullUsernameOrPasswordException
 import ru.korolevss.exception.PasswordChangeException
 import ru.korolevss.exception.UserExistsException
-import ru.korolevss.model.MediaModel
 import ru.korolevss.model.UserModel
 import ru.korolevss.repository.UserRepository
-import java.io.IOException
 
 class UserService(
     private val repo: UserRepository,
     private val tokenService: JWTTokenService,
     private val passwordEncoder: PasswordEncoder
 ) {
-    private val mutex = Mutex()
 
     suspend fun getModelById(id: Long): UserModel? {
         return repo.getById(id)
@@ -47,7 +42,7 @@ class UserService(
         }
         val copy = model.copy(password = passwordEncoder.encode(input.new))
         repo.save(copy)
-        val token = tokenService.generate(model.id)
+        val token = tokenService.generate(model)
         return AuthenticationResponseDto(token)
     }
 
@@ -58,7 +53,7 @@ class UserService(
             throw InvalidPasswordException("Wrong password!")
         }
 
-        val token = tokenService.generate(model.id)
+        val token = tokenService.generate(model)
         return AuthenticationResponseDto(token)
     }
 
@@ -69,7 +64,7 @@ class UserService(
             throw UserExistsException("User already exists")
         } else {
             val model = repo.save(UserModel(username = username, password = passwordEncoder.encode(password)))
-            val token = tokenService.generate(model.id)
+            val token = tokenService.generate(model)
             return AuthenticationResponseDto(token)
         }
     }
