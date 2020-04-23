@@ -20,8 +20,8 @@ class UserService(
     private val passwordEncoder: PasswordEncoder
 ) {
 
-    suspend fun getModelById(id: Long): UserModel? {
-        return repo.getById(id)
+    suspend fun getModelByIdPassword(id: Long, password: String): UserModel? {
+        return repo.getByIdPassword(id, password)
     }
 
     suspend fun getByUserName(username: String): UserModel? {

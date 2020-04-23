@@ -13,9 +13,16 @@ class UserRepositoryInMemoryWithAtomicImpl : UserRepository {
 
     override suspend fun getAll(): List<UserModel> = items.toList()
 
-
     override suspend fun getById(id: Long): UserModel? = items.find { it.id == id }
 
+    override suspend fun getByIdPassword(id: Long, password: String): UserModel? {
+        val item = items.find { it.id == id }
+        return if (password == item?.password) {
+            item
+        } else {
+            null
+        }
+    }
 
     override suspend fun getByIds(ids: Collection<Long>): List<UserModel> = items.filter { ids.contains(it.id) }
 

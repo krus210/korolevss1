@@ -115,7 +115,8 @@ fun Application.module() {
 
             validate {
                 val id = it.payload.getClaim("id").asLong()
-                userService.getModelById(id)
+                val password = it.payload.getClaim("password").asString()
+                userService.getModelByIdPassword(id, password)
             }
         }
         basic("basic") {
