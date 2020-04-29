@@ -2,11 +2,12 @@ package ru.korolevss.dto
 
 import ru.korolevss.model.*
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class PostResponseDto(
     val id: Long,
     val textOfPost: String? = null,
-    val dateOfPost: ZonedDateTime? = null,
+    val dateOfPost: String? = null,
     val nameAuthor: String?,
     var sharesCount: Int,
     var commentsCount: Int,
@@ -31,10 +32,13 @@ class PostResponseDto(
             val commentsCount = postModel.commentUserIdList.size
             val sharesCount = postModel.shareUserIdList.size
 
+            val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z");
+            val dateOfPostString = postModel.dateOfPost?.format(formatter)
+
             return PostResponseDto(
                 id = postModel.id,
                 textOfPost = postModel.textOfPost,
-                dateOfPost = postModel.dateOfPost,
+                dateOfPost = dateOfPostString,
                 nameAuthor = postModel.user?.username,
                 sharesCount = likesCount,
                 commentsCount = commentsCount,
