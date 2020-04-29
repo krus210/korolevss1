@@ -109,8 +109,8 @@ class RoutingV1(
                         }
                         post {
                             val input = call.receive<PostRequestDto>()
-                            val response = postService.save(input, me!!)
-                            call.respond(response)
+                            postService.save(input, me!!)
+                            call.respond(HttpStatusCode.OK)
                         }
                         post("/{id}") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
@@ -118,8 +118,8 @@ class RoutingV1(
                                 "Long"
                             )
                             val input = call.receive<PostRequestDto>()
-                            val response = postService.saveById(id, input, me!!)
-                            call.respond(response)
+                            postService.saveById(id, input, me!!)
+                            call.respond(HttpStatusCode.OK)
                         }
                         delete("/{id}") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(

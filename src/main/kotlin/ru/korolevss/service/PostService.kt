@@ -61,7 +61,7 @@ class PostService(private val repo: PostRepository) {
         val model = PostModel(
             id = 0L,
             textOfPost = input.textOfPost,
-            postType = input.postType, source = input.source, address = input.address,
+            postType = input.postType, address = input.address,
             coordinates = input.coordinates, sourceVideo = input.sourceVideo, sourceAd = input.sourceAd, user = me,
             attachment = input.attachmentId?.let { MediaModel(id = it, mediaType = MediaType.IMAGE) }
         )
@@ -73,7 +73,7 @@ class PostService(private val repo: PostRepository) {
         val model = PostModel(
             id = id,
             textOfPost = input.textOfPost,
-            postType = input.postType, source = input.source, address = input.address,
+            postType = input.postType, address = input.address,
             coordinates = input.coordinates, sourceVideo = input.sourceVideo, sourceAd = input.sourceAd, user = me,
             attachment = input.attachmentId?.let { MediaModel(id = it, mediaType = MediaType.IMAGE) }
         )

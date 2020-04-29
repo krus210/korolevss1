@@ -7,7 +7,6 @@ import ru.korolevss.model.PostType
 class PostRequestDto (
     val textOfPost: String? = null,
     val postType: PostType = PostType.POST,
-    val source: PostModel? = null,
     val address: String? = null,
     val coordinates: Coordinates? = null,
     val sourceVideo: String? = null,

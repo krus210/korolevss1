@@ -15,11 +15,12 @@ class PostResponseDto(
     var isCommentedByUser: Boolean,
     var isSharedByUser: Boolean,
     val postType: PostType = PostType.POST,
-    val source: PostModel? = null,
+    val sourceId: Long? = null,
     val address: String? = null,
     val coordinates: Coordinates? = null,
     val sourceVideo: String? = null,
-    val sourceAd: String? = null
+    val sourceAd: String? = null,
+    val attachmentId: String? = null
 ) {
     companion object {
         fun fromModel(postModel: PostModel, userId: Long): PostResponseDto {
@@ -42,11 +43,12 @@ class PostResponseDto(
                 isCommentedByUser = isCommentByUser,
                 isSharedByUser = isShareByUser,
                 postType = postModel.postType,
-                source = postModel.source,
+                sourceId = postModel.sourceId,
                 address = postModel.address,
                 coordinates = postModel.coordinates,
                 sourceVideo = postModel.sourceVideo,
-                sourceAd = postModel.sourceAd
+                sourceAd = postModel.sourceAd,
+                attachmentId = postModel.attachment?.id
             )
         }
     }

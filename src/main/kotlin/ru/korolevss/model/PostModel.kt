@@ -7,7 +7,7 @@ data class PostModel(
     val textOfPost: String? = null,
     val dateOfPost: ZonedDateTime? = null,
     val postType: PostType = PostType.POST,
-    val source: PostModel? = null,
+    val sourceId: Long? = null,
     val address: String? = null,
     val coordinates: Coordinates? = null,
     val sourceVideo: String? = null,
