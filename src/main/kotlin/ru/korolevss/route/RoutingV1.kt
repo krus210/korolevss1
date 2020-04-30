@@ -75,7 +75,7 @@ class RoutingV1(
                             val response = postService.getById(id, me!!.id)
                             call.respond(response)
                         }
-                        get("/{id}/like") {
+                        post("/{id}/like") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
                                 "id",
                                 "Long"
@@ -83,7 +83,7 @@ class RoutingV1(
                             val response = postService.likeById(id, me!!.id)
                             call.respond(response)
                         }
-                        get("/{id}/dislike") {
+                        delete("/{id}/dislike") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
                                 "id",
                                 "Long"
@@ -91,7 +91,7 @@ class RoutingV1(
                             val response = postService.dislikeById(id, me!!.id)
                             call.respond(response)
                         }
-                        get("/{id}/comment") {
+                        post("/{id}/comment") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
                                 "id",
                                 "Long"
@@ -99,7 +99,7 @@ class RoutingV1(
                             val response = postService.commentById(id, me!!.id)
                             call.respond(response)
                         }
-                        get("/{id}/share") {
+                        post("/{id}/share") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
                                 "id",
                                 "Long"
