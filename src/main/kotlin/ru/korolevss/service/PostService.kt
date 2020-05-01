@@ -41,9 +41,18 @@ class PostService(private val repo: PostRepository) {
     }
 
     @KtorExperimentalAPI
-    suspend fun shareById(id: Long, userId: Long): PostResponseDto {
-        val model = repo.shareById(id, userId) ?: throw NotFoundException()
-        return PostResponseDto.fromModel(model, userId)
+    suspend fun shareById(id: Long, me: UserModel, input: PostRequestDto): PostResponseDto {
+        val model = repo.shareById(id, me.id) ?: throw NotFoundException()
+        val modelShared = PostModel(
+            id = 0L,
+            textOfPost = "${input.textOfPost}\n........\nReposted text by ${model.user?.username}\n........\n${model.textOfPost}",
+            postType = input.postType, address = input.address,
+            sourceId = id,
+            coordinates = input.coordinates, sourceVideo = input.sourceVideo, sourceAd = input.sourceAd, user = me,
+            attachment = input.attachmentId?.let { MediaModel(id = it, mediaType = MediaType.IMAGE) }
+        )
+        PostResponseDto.fromModel(repo.save(modelShared), me.id)
+        return PostResponseDto.fromModel(model, me.id)
     }
 
     @KtorExperimentalAPI

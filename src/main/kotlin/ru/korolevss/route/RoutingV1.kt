@@ -104,7 +104,8 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.shareById(id, me!!.id)
+                            val input = call.receive<PostRequestDto>()
+                            val response = postService.shareById(id, me!!, input)
                             call.respond(response)
                         }
                         post {
