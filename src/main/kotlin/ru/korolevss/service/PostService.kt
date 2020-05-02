@@ -5,6 +5,7 @@ import io.ktor.util.KtorExperimentalAPI
 import ru.korolevss.dto.PostRequestDto
 import ru.korolevss.dto.PostResponseDto
 import ru.korolevss.exception.UserAccessException
+import ru.korolevss.me
 import ru.korolevss.model.MediaModel
 import ru.korolevss.model.MediaType
 import ru.korolevss.model.PostModel
@@ -14,6 +15,22 @@ import ru.korolevss.repository.PostRepository
 class PostService(private val repo: PostRepository) {
     suspend fun getAll(userId: Long): List<PostResponseDto> {
         return repo.getAll().map { PostResponseDto.fromModel(it, userId) }
+    }
+
+    suspend fun getRecent(userId: Long): List<PostResponseDto> {
+        return repo.getRecent().map { PostResponseDto.fromModel(it, userId) }
+    }
+
+    @KtorExperimentalAPI
+    suspend fun getPostsAfter(id: Long, userId: Long): List<PostResponseDto> {
+        val listPostsAfter = repo.getPostsAfter(id) ?: throw NotFoundException()
+        return listPostsAfter.map { PostResponseDto.fromModel(it, userId) }
+    }
+
+    @KtorExperimentalAPI
+    suspend fun getPostsBefore(id: Long, userId: Long): List<PostResponseDto> {
+        val listPostsAfter = repo.getPostsBefore(id) ?: throw NotFoundException()
+        return listPostsAfter.map { PostResponseDto.fromModel(it, userId) }
     }
 
     @KtorExperimentalAPI
@@ -35,14 +52,8 @@ class PostService(private val repo: PostRepository) {
     }
 
     @KtorExperimentalAPI
-    suspend fun commentById(id: Long, userId: Long): PostResponseDto {
-        val model = repo.commentById(id, userId) ?: throw NotFoundException()
-        return PostResponseDto.fromModel(model, userId)
-    }
-
-    @KtorExperimentalAPI
-    suspend fun shareById(id: Long, me: UserModel, input: PostRequestDto): PostResponseDto {
-        val model = repo.shareById(id, me.id) ?: throw NotFoundException()
+    suspend fun repostById(id: Long, me: UserModel, input: PostRequestDto): PostResponseDto {
+        val model = repo.repostById(id, me.id) ?: throw NotFoundException()
         val modelShared = PostModel(
             id = 0L,
             textOfPost = "${input.textOfPost}\n........\nReposted text by ${model.user?.username}\n........\n${model.textOfPost}",

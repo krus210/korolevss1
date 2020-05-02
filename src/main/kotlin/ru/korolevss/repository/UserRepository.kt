@@ -1,6 +1,7 @@
 package ru.korolevss.repository
 
 import ru.korolevss.model.MediaModel
+import ru.korolevss.model.PostModel
 import ru.korolevss.model.UserModel
 
 interface UserRepository {

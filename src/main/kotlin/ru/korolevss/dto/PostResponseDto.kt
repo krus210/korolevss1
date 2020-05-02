@@ -1,7 +1,6 @@
 package ru.korolevss.dto
 
 import ru.korolevss.model.*
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class PostResponseDto(
@@ -9,12 +8,10 @@ class PostResponseDto(
     val textOfPost: String? = null,
     val dateOfPost: String? = null,
     val nameAuthor: String?,
-    var sharesCount: Int,
-    var commentsCount: Int,
+    var repostsCount: Int,
     var likesCount: Int,
     var isLikedByUser: Boolean,
-    var isCommentedByUser: Boolean,
-    var isSharedByUser: Boolean,
+    var isRepostedByUser: Boolean,
     val postType: PostType = PostType.POST,
     val sourceId: Long? = null,
     val address: String? = null,
@@ -26,11 +23,9 @@ class PostResponseDto(
     companion object {
         fun fromModel(postModel: PostModel, userId: Long): PostResponseDto {
             val isLikedByUser = postModel.likedUserIdList.contains(userId)
-            val isCommentByUser = postModel.commentUserIdList.contains(userId)
-            val isShareByUser = postModel.shareUserIdList.contains(userId)
+            val isRepostedByUser = postModel.repostedUserIdList.contains(userId)
             val likesCount = postModel.likedUserIdList.size
-            val commentsCount = postModel.commentUserIdList.size
-            val sharesCount = postModel.shareUserIdList.size
+            val repostsCount = postModel.repostedUserIdList.size
 
             val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy - HH:mm:ss Z");
             val dateOfPostString = postModel.dateOfPost?.format(formatter)
@@ -40,12 +35,10 @@ class PostResponseDto(
                 textOfPost = postModel.textOfPost,
                 dateOfPost = dateOfPostString,
                 nameAuthor = postModel.user?.username,
-                commentsCount = commentsCount,
                 likesCount = likesCount,
                 isLikedByUser = isLikedByUser,
-                isCommentedByUser = isCommentByUser,
-                isSharedByUser = isShareByUser,
-                sharesCount = sharesCount,
+                isRepostedByUser = isRepostedByUser,
+                repostsCount = repostsCount,
                 postType = postModel.postType,
                 sourceId = postModel.sourceId,
                 address = postModel.address,

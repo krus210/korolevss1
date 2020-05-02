@@ -9,6 +9,9 @@ interface PostRepository {
     suspend fun removeById(id: Long)
     suspend fun likeById(id: Long, userId: Long): PostModel?
     suspend fun dislikeById(id: Long, userId: Long): PostModel?
-    suspend fun commentById(id: Long, userId: Long): PostModel?
-    suspend fun shareById(id: Long, userId: Long): PostModel?
+    suspend fun repostById(id: Long, userId: Long): PostModel?
+    suspend fun getRecent(): List<PostModel>
+    suspend fun getPostsAfter(id: Long): List<PostModel>?
+    suspend fun getPostsBefore(id: Long): List<PostModel>?
+
 }

@@ -16,7 +16,43 @@ class PostRepositoryMutex : PostRepository {
 
     override suspend fun getAll(): List<PostModel> = items.reversed()
 
+    override suspend fun getRecent(): List<PostModel> {
+        return try {
+            getAll().slice(0..4)
+        } catch (e: IndexOutOfBoundsException) {
+            getAll()
+        }
+    }
 
+    override suspend fun getPostsAfter(id: Long): List<PostModel>? {
+        val item = getById(id)
+        val itemsReversed = getAll()
+        return when (val index = itemsReversed.indexOfFirst { it.id == item?.id }) {
+            0,-1 -> {
+                null
+            }
+            else -> {
+                itemsReversed.slice(0 until index)
+            }
+        }
+    }
+
+    override suspend fun getPostsBefore(id: Long): List<PostModel>? {
+        val item = getById(id)
+        val itemsReversed = getAll()
+        return when (val index = itemsReversed.indexOfFirst { it.id == item?.id }) {
+            -1, (items.size - 1) -> {
+                null
+            }
+            else -> {
+                try {
+                    itemsReversed.slice((index + 1)..(index + 5))
+                } catch (e: IndexOutOfBoundsException) {
+                    itemsReversed.slice((index + 1) until items.size)
+                }
+            }
+        }
+    }
     override suspend fun getById(id: Long): PostModel? = items.find { it.id == id }
 
 
@@ -64,20 +100,11 @@ class PostRepositoryMutex : PostRepository {
         return items[index]
     }
 
-    override suspend fun commentById(id: Long, userId: Long): PostModel? {
+    override suspend fun repostById(id: Long, userId: Long): PostModel? {
         val index = items.indexOfFirst { it.id == id }
         if (index < 0) return null
         mutex.withLock {
-            items[index].commentUserIdList.add(userId)
-        }
-        return items[index]
-    }
-
-    override suspend fun shareById(id: Long, userId: Long): PostModel? {
-        val index = items.indexOfFirst { it.id == id }
-        if (index < 0) return null
-        mutex.withLock {
-            items[index].shareUserIdList.add(userId)
+            items[index].repostedUserIdList.add(userId)
         }
         return items[index]
     }

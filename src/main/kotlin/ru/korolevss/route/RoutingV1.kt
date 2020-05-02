@@ -75,6 +75,26 @@ class RoutingV1(
                             val response = postService.getById(id, me!!.id)
                             call.respond(response)
                         }
+                        get("/recent") {
+                            val response = postService.getRecent(me!!.id)
+                            call.respond(response)
+                        }
+                        get("{id}/get-posts-after") {
+                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
+                                "id",
+                                "Long"
+                            )
+                            val response = postService.getPostsAfter(id, me!!.id)
+                            call.respond(response)
+                        }
+                        get("{id}/get-posts-before") {
+                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
+                                "id",
+                                "Long"
+                            )
+                            val response = postService.getPostsBefore(id, me!!.id)
+                            call.respond(response)
+                        }
                         post("/{id}/like") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
                                 "id",
@@ -91,21 +111,13 @@ class RoutingV1(
                             val response = postService.dislikeById(id, me!!.id)
                             call.respond(response)
                         }
-                        post("/{id}/comment") {
-                            val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
-                                "id",
-                                "Long"
-                            )
-                            val response = postService.commentById(id, me!!.id)
-                            call.respond(response)
-                        }
-                        post("/{id}/share") {
+                        post("/{id}/repost") {
                             val id = call.parameters["id"]?.toLongOrNull() ?: throw ParameterConversionException(
                                 "id",
                                 "Long"
                             )
                             val input = call.receive<PostRequestDto>()
-                            val response = postService.shareById(id, me!!, input)
+                            val response = postService.repostById(id, me!!, input)
                             call.respond(response)
                         }
                         post {

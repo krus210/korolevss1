@@ -15,8 +15,7 @@ data class PostModel(
     val user: UserModel? = null,
     val attachment: MediaModel? = null,
     var likedUserIdList: MutableList<Long> = mutableListOf(),
-    var commentUserIdList: MutableList<Long> = mutableListOf(),
-    var shareUserIdList: MutableList<Long> = mutableListOf()
+    var repostedUserIdList: MutableList<Long> = mutableListOf()
     )
 enum class PostType {
     POST, EVENT, REPOST, YOUTUBE, AD_POST
