@@ -19,7 +19,7 @@ class PostRepositoryMutex : PostRepository {
     override suspend fun getRecent(): List<PostModel> {
         try {
             if (items.isEmpty()) {
-                return mutableListOf()
+                return emptyList()
             }
             return getAll().slice(0..4)
         } catch (e: IndexOutOfBoundsException) {
@@ -32,7 +32,7 @@ class PostRepositoryMutex : PostRepository {
         val itemsReversed = getAll()
         return when (val index = itemsReversed.indexOfFirst { it.id == item?.id }) {
             -1 -> null
-            0 -> mutableListOf()
+            0 -> emptyList()
             else -> itemsReversed.slice(0 until index)
         }
     }
@@ -42,7 +42,7 @@ class PostRepositoryMutex : PostRepository {
         val itemsReversed = getAll()
         return when (val index = itemsReversed.indexOfFirst { it.id == item?.id }) {
             -1-> null
-            (items.size - 1) -> mutableListOf()
+            (items.size - 1) -> emptyList()
             else -> {
                 try {
                     itemsReversed.slice((index + 1)..(index + 5))
