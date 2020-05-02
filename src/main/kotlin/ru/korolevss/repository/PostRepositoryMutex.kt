@@ -17,13 +17,13 @@ class PostRepositoryMutex : PostRepository {
     override suspend fun getAll(): List<PostModel> = items.reversed()
 
     override suspend fun getRecent(): List<PostModel> {
-        return try {
+        try {
             if (items.isEmpty()) {
-                items
+                return mutableListOf()
             }
-            getAll().slice(0..4)
+            return getAll().slice(0..4)
         } catch (e: IndexOutOfBoundsException) {
-            getAll()
+            return getAll()
         }
     }
 
