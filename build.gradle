@@ -30,6 +30,7 @@ dependencies {
     implementation "org.springframework.security:spring-security-crypto:5.1.6.RELEASE"
     testImplementation "com.jayway.jsonpath:json-path:2.4.0"
     implementation 'org.apache.tika:tika-parsers:1.11'
+    implementation 'com.google.firebase:firebase-admin:6.10.0'
 }
 
 test {

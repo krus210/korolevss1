@@ -11,6 +11,7 @@ import ru.korolevss.exception.InvalidPasswordException
 import ru.korolevss.exception.NullUsernameOrPasswordException
 import ru.korolevss.exception.PasswordChangeException
 import ru.korolevss.exception.UserExistsException
+import ru.korolevss.me
 import ru.korolevss.model.UserModel
 import ru.korolevss.repository.UserRepository
 
@@ -67,5 +68,10 @@ class UserService(
             val token = tokenService.generate(model)
             return AuthenticationResponseDto(token)
         }
+    }
+
+    @KtorExperimentalAPI
+    suspend fun saveFirebaseToken(id: Long, firebaseToken: String) {
+        repo.saveFirebaseToken(id, firebaseToken) ?: throw NotFoundException()
     }
 }

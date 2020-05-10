@@ -30,10 +30,7 @@ import ru.korolevss.repository.PostRepositoryMutex
 import ru.korolevss.repository.UserRepository
 import ru.korolevss.repository.UserRepositoryInMemoryWithAtomicImpl
 import ru.korolevss.route.RoutingV1
-import ru.korolevss.service.FileService
-import ru.korolevss.service.JWTTokenService
-import ru.korolevss.service.PostService
-import ru.korolevss.service.UserService
+import ru.korolevss.service.*
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -85,6 +82,10 @@ fun Application.module() {
             call.respond(HttpStatusCode.BadRequest, ErrorDto(error.message))
             throw error
         }
+        exception<ConfigurationException> { error ->
+            call.respond(HttpStatusCode.NotFound, ErrorDto(error.message))
+            throw error
+        }
     }
 
     install(KodeinFeature) {
@@ -97,9 +98,29 @@ fun Application.module() {
         bind<FileService>() with eagerSingleton { FileService(instance(tag = "upload-dir")) }
         bind<UserRepository>() with eagerSingleton { UserRepositoryInMemoryWithAtomicImpl() }
         bind<UserService>() with eagerSingleton { UserService(instance(), instance(), instance()) }
+
+        constant(tag = "fcm-password") with (environment.config.propertyOrNull("korolevss.fcm.password")?.getString()
+            ?: throw ConfigurationException("FCM Password is not specified"))
+        constant(tag = "fcm-salt") with (environment.config.propertyOrNull("korolevss.fcm.salt")?.getString()
+            ?: throw ConfigurationException("FCM Salt is not specified"))
+        constant(tag = "fcm-db-url") with (environment.config.propertyOrNull("korolevss.fcm.db-url")?.getString()
+            ?: throw ConfigurationException("FCM DB Url is not specified"))
+        constant(tag = "fcm-path") with (environment.config.propertyOrNull("korolevss.fcm.path")?.getString()
+            ?: throw ConfigurationException("FCM JSON Path is not specified"))
+
+        bind<FCMService>() with eagerSingleton {
+            FCMService(
+                instance(tag = "fcm-db-url"),
+                instance(tag = "fcm-password"),
+                instance(tag = "fcm-salt"),
+                instance(tag = "fcm-path")
+            )
+        }
+
         bind<RoutingV1>() with eagerSingleton {
             RoutingV1(
                 instance(tag = "upload-dir"),
+                instance(),
                 instance(),
                 instance(),
                 instance()
@@ -140,6 +161,7 @@ fun Application.module() {
         routingV1.setup(this)
     }
 }
+
 
 
 

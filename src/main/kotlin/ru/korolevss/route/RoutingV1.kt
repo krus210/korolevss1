@@ -11,11 +11,9 @@ import io.ktor.request.receiveMultipart
 import io.ktor.response.respond
 import io.ktor.routing.*
 import io.ktor.util.KtorExperimentalAPI
-import ru.korolevss.dto.AuthenticationRequestDto
-import ru.korolevss.dto.PasswordChangeRequestDto
-import ru.korolevss.dto.PostRequestDto
-import ru.korolevss.dto.UserResponseDto
+import ru.korolevss.dto.*
 import ru.korolevss.me
+import ru.korolevss.service.FCMService
 import ru.korolevss.service.FileService
 import ru.korolevss.service.PostService
 import ru.korolevss.service.UserService
@@ -24,7 +22,8 @@ class RoutingV1(
     private val staticPath: String,
     private val postService: PostService,
     private val fileService: FileService,
-    private val userService: UserService
+    private val userService: UserService,
+    private val fcmService: FCMService
 ) {
     @KtorExperimentalAPI
     fun setup(configuration: Routing) {
@@ -59,6 +58,15 @@ class RoutingV1(
                             val input = call.receive<PasswordChangeRequestDto>()
                             val response = userService.changePassword(me!!.id, input)
                             call.respond(response)
+                        }
+                    }
+
+                    route("/firebase-token") {
+                        post {
+                            val token = call.receive<TokenDto>()
+                            userService.saveFirebaseToken(me!!.id, token.token)
+                            call.respond(HttpStatusCode.OK)
+                            fcmService.send(me!!.id, token.token, "Welcome ${me!!.username}")
                         }
                     }
 
@@ -100,7 +108,7 @@ class RoutingV1(
                                 "id",
                                 "Long"
                             )
-                            val response = postService.likeById(id, me!!.id)
+                            val response = postService.likeById(id, me!!, fcmService)
                             call.respond(response)
                         }
                         delete("/{id}/dislike") {
